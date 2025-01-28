@@ -1,11 +1,15 @@
 import { BsMusicNoteBeamed } from 'react-icons/bs'
 import { useAudioPlayerContext } from '../context/audio-player-context'
-
-const TrackInfo = () => {
+import React from 'react';
+interface trackInfoOptions {
+  showThumbnail?: boolean;
+  showAuthor?: boolean;
+};
+const TrackInfo : React.FC<trackInfoOptions> =({showAuthor , showThumbnail}) => {
   const {currentTrack} = useAudioPlayerContext()
   return (
     <div className="flex text-nowrap  items-center gap-4">
-      <div className="w-12 h-12 flex items-center justify-center bg-gray-200 rounded-md overflow-hidden">
+      <div className={`w-12 text-ellipsis h-12 flex items-center justify-center bg-gray-200 rounded-md overflow-hidden ${!showThumbnail ? 'hidden' : "" } ` }>
         {currentTrack?.thumbnail ? (
           <img
             className="w-full h-full object-cover"
@@ -20,7 +24,7 @@ const TrackInfo = () => {
           </div>
         )}
       </div>
-      <div>
+      <div className='hidden md:block'>
         <p className="font-bold lg:truncate  ">
           {currentTrack?.title}
         </p>

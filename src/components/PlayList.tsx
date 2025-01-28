@@ -6,7 +6,7 @@ function PlayList() {
   return <>
   
   {tracksQueue?.length > 0 ? tracksQueue?.map((track , idx) => (
-    <div onClick={RemoveFromQueue.bind(this,idx)}>{track.title}</div>
+    <div key={idx} onClick={RemoveFromQueue.bind(this,idx)}>{track.title}</div>
   )) : ''}</>;
 }
 

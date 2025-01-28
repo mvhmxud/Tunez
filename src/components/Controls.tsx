@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useAudioPlayerContext } from "../context/audio-player-context";
 import {
   BsFillFastForwardFill,
@@ -11,43 +11,35 @@ import {
   BsRepeat1,
 } from "react-icons/bs";
 import { tracks } from "../data";
+import { AudioPlayerOptions } from "./AudioPLayer";
 
-
-
-const Controls = () => {
+const Controls : FC<AudioPlayerOptions> = ({repeat , forward}) => {
   const {
     audioRef,
     currentTrack,
-    setCurrentTrack,
     AddToQueue,
+    playTrack,
     playNext,
     playPrev,
     FastForward,
     Rewind,
     repeatState,
     toggleRepeat,
+    togglePlayButton,
+    isPlaying
   } = useAudioPlayerContext();
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const intervalRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (isPlaying) {
-      audioRef.current?.play();
-    } else {
-      audioRef.current?.pause();
-    }
-  }, [isPlaying, audioRef]);
 
   const testSetTrack = (idx: number) => {
+    playTrack(tracks[idx]);
+  };
+
+  const handleAddToQueue = (idx: number) => {
     AddToQueue(tracks[idx]);
-    if (!audioRef.current?.src && !isPlaying) {
-      setCurrentTrack(tracks[idx]);
-      setIsPlaying(true);
-    }
   };
 
   const handleFastForward = () => {
     if (!audioRef.current?.src) return;
-    setIsPlaying(true);
     if (intervalRef.current) return;
     intervalRef.current = setInterval(() => {
       FastForward();
@@ -56,7 +48,6 @@ const Controls = () => {
 
   const handleRewind = () => {
     if (!audioRef.current?.src) return;
-    setIsPlaying(true);
     if (intervalRef.current) return;
     intervalRef.current = setInterval(() => {
       Rewind();
@@ -69,58 +60,57 @@ const Controls = () => {
       intervalRef.current = null;
     }
   };
+  useEffect(()=>{
+    console.log("controls",isPlaying)
+  },[isPlaying])
 
   return (
-    <div className="flex  gap-4 items-center">
-      <div className="absolute -top-10 flex gap-5 ">
+    <div className="flex gap-4 items-center">
+      <div className="absolute -top-10 flex md:gap-5 ">
         <button onClick={testSetTrack.bind(this, 0)}>Trinx</button>
         <button onClick={testSetTrack.bind(this, 2)}>Shahr 5</button>
-        <button onClick={testSetTrack.bind(this, 1)}>1/4 Qarn</button>
+        <button onClick={handleAddToQueue.bind(this, 1)}>1/4 Qarn</button>
       </div>
       <audio ref={audioRef} src={currentTrack?.src} />
       <button onClick={playPrev}>
-        <BsSkipStartFill size={20} />
+        <BsSkipStartFill className="text-xl md:text-3xl" />
       </button>
-      <button
+      {forward && <button
         onMouseDown={handleRewind}
         onMouseUp={stopCounter}
         onMouseLeave={stopCounter}
       >
-        <BsFillRewindFill size={20} />
-      </button>
-      <button
-        onClick={() =>
-         currentTrack ? setIsPlaying((prev) => !prev) : null
-        }
-      >
+        <BsFillRewindFill className="text-xl md:text-3xl" />
+      </button>}
+      <button onClick={togglePlayButton}>
         {isPlaying ? (
-          <BsFillPauseFill size={30} />
+          <BsFillPauseFill className="text-xl md:text-3xl" />
         ) : (
-          <BsFillPlayFill size={30} />
+          <BsFillPlayFill className="text-xl md:text-3xl" />
         )}
       </button>
-      <button
+      {forward && <button
         onMouseDown={handleFastForward}
         onMouseUp={stopCounter}
         onMouseLeave={stopCounter}
       >
-        <BsFillFastForwardFill size={20} />
-      </button>
+        <BsFillFastForwardFill className="text-xl md:text-3xl" />
+      </button>}
       <button onClick={playNext}>
-        <BsSkipEndFill size={20} />
+        <BsSkipEndFill className="text-xl md:text-3xl" />
       </button>
-      <button
+     {repeat &&  <button
         onClick={toggleRepeat}
         className={`${repeatState == "REPEAT" && "text-[#f50]"} ${
           repeatState == "REPEATCURRENT" && "text-[#f50]"
         } `}
       >
         {repeatState === "REPEATCURRENT" ? (
-          <BsRepeat1 size={20} />
+          <BsRepeat1 className="text-xl md:text-3xl" />
         ) : (
-          <BsRepeat size={20} />
+          <BsRepeat className="text-xl md:text-3xl" />
         )}
-      </button>
+      </button>}
       <div className="bg-red-800 absolute top-0"></div>
     </div>
   );

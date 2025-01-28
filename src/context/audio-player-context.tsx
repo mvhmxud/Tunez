@@ -8,20 +8,23 @@ import {
   useRef,
   useEffect,
 } from "react";
-import { RepeatToggleStates, Track } from "../types";
+import { RepeatToggleStates, Track } from "../types/types";
 import { tracks } from "../data";
 
 interface AudioPlayerContextType {
   currentTrack: Track | null;
   currentTrackIdx: number | null;
   setCurrentTrack: Dispatch<SetStateAction<Track>>;
+  isPlaying: boolean;
   audioRef: React.RefObject<HTMLAudioElement>;
+  playTrack: (track: Track) => void;
   AddToQueue: (newTrack: Track) => void;
   RemoveFromQueue: (idx: number) => void;
   playNext: () => void;
   playPrev: () => void;
   FastForward: () => void;
   Rewind: () => void;
+  togglePlayButton: () => void;
   tracksQueue: Track[] | null;
   repeatState: RepeatToggleStates;
   toggleRepeat: () => void;
@@ -37,6 +40,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const [currentTrackIdx, setCurrentTrackIdx] = useState<number>(0);
   const [tracksQueue, setTracksQueue] = useState<Track[] | []>([]);
   const [isEnded, setIsEnded] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [repeatState, setRePeatState] =
     useState<RepeatToggleStates>("NOREPEAT");
 
@@ -84,6 +88,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (currentTrack && audioRef.current) {
       audioRef.current.src = currentTrack.src;
+      setIsPlaying(true);
       const playAudio = () => {
         audioRef.current?.play().catch((err) => {
           console.error("Error playing audio:", err);
@@ -95,6 +100,15 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
       };
     }
   }, [currentTrack, audioRef]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      audioRef.current?.play();
+    } else {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    }
+  }, [isPlaying, audioRef]);
 
   const AddToQueue = (newTrack: Track): void => {
     const isDuplicate = tracksQueue.some(
@@ -112,6 +126,10 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setTracksQueue((prev) => [...prev, newTrack]);
     }
+    if (!audioRef.current?.src && !isPlaying) {
+      setCurrentTrack(newTrack);
+      setIsPlaying(true);
+    }
   };
 
   const emptyTracksQueue = () => {
@@ -122,6 +140,13 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
       audioRef.current.src = "";
       audioRef.current?.pause();
     }
+  };
+
+  const playTrack = (track: Track) => {
+    emptyTracksQueue();
+    AddToQueue(track);
+    setCurrentTrack(track);
+    setCurrentTrackIdx(0);
   };
   const RemoveFromQueue = (idx: number) => {
     setTracksQueue((prev) => {
@@ -175,6 +200,12 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const togglePlayButton = () => {
+    if (currentTrack) {
+      setIsPlaying((prev) => !prev);
+    }
+    return;
+  };
   const Rewind = () => {
     if (audioRef.current?.src) {
       audioRef.current.currentTime = audioRef.current.currentTime - 1;
@@ -195,6 +226,9 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     Rewind,
     repeatState,
     toggleRepeat,
+    togglePlayButton,
+    playTrack,
+    isPlaying
   };
   return (
     <AudioPlayerContext.Provider value={contextValue}>

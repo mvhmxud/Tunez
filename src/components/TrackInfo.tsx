@@ -9,7 +9,7 @@ const TrackInfo : React.FC<trackInfoOptions> =({showAuthor , showThumbnail}) => 
   const {currentTrack} = useAudioPlayerContext()
   return (
     <div className="flex text-nowrap  items-center gap-4">
-      <div className={`w-12 text-ellipsis h-12 flex items-center justify-center bg-gray-200 rounded-md overflow-hidden ${!showThumbnail ? 'hidden' : "" } ` }>
+      <div className={`w-12  h-12 flex items-center justify-center bg-gray-200 rounded-md overflow-hidden ${!showThumbnail ? 'hidden' : "" } ` }>
         {currentTrack?.thumbnail ? (
           <img
             className="w-full h-full object-cover"

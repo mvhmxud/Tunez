@@ -66,7 +66,6 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         case "NOREPEAT":
           if (!isLastTrack) {
             playNext();
-            console.log("isnt last track");
           }
           break;
         case "REPEAT":
@@ -143,10 +142,12 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const playTrack = (track: Track) => {
-    emptyTracksQueue();
-    AddToQueue(track);
-    setCurrentTrack(track);
-    setCurrentTrackIdx(0);
+    if (currentTrack?.title != track.title) {
+      emptyTracksQueue();
+      AddToQueue(track);
+      setCurrentTrack(track);
+      setCurrentTrackIdx(0);
+    }
   };
   const RemoveFromQueue = (idx: number) => {
     setTracksQueue((prev) => {
@@ -228,7 +229,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     toggleRepeat,
     togglePlayButton,
     playTrack,
-    isPlaying
+    isPlaying,
   };
   return (
     <AudioPlayerContext.Provider value={contextValue}>

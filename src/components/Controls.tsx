@@ -1,9 +1,7 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 import { useAudioPlayerContext } from "../context/audio-player-context";
 import {
   BsFillFastForwardFill,
-  BsFillPauseFill,
-  BsFillPlayFill,
   BsFillRewindFill,
   BsSkipEndFill,
   BsSkipStartFill,
@@ -12,8 +10,9 @@ import {
 } from "react-icons/bs";
 import { tracks } from "../data";
 import { AudioPlayerOptions } from "./AudioPLayer";
+import { IoPauseCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
 
-const Controls : FC<AudioPlayerOptions> = ({repeat , forward}) => {
+const   Controls : FC<AudioPlayerOptions> = ({repeat , forward , theme}) => {
   const {
     audioRef,
     currentTrack,
@@ -60,12 +59,10 @@ const Controls : FC<AudioPlayerOptions> = ({repeat , forward}) => {
       intervalRef.current = null;
     }
   };
-  useEffect(()=>{
-    console.log("controls",isPlaying)
-  },[isPlaying])
+
 
   return (
-    <div className="flex gap-4 items-center">
+    <div className='flex gap-4 items-center'  style={{ color: theme?.primaryColor }}>
       <div className="absolute -top-10 flex md:gap-5 ">
         <button onClick={testSetTrack.bind(this, 0)}>Trinx</button>
         <button onClick={testSetTrack.bind(this, 2)}>Shahr 5</button>
@@ -73,20 +70,20 @@ const Controls : FC<AudioPlayerOptions> = ({repeat , forward}) => {
       </div>
       <audio ref={audioRef} src={currentTrack?.src} />
       <button onClick={playPrev}>
-        <BsSkipStartFill className="text-xl md:text-3xl" />
+        <BsSkipStartFill className="text-xl md:text-2xl " />
       </button>
       {forward && <button
         onMouseDown={handleRewind}
         onMouseUp={stopCounter}
         onMouseLeave={stopCounter}
       >
-        <BsFillRewindFill className="text-xl md:text-3xl" />
+        <BsFillRewindFill className="text-xl md:text-2xl" />
       </button>}
       <button onClick={togglePlayButton}>
         {isPlaying ? (
-          <BsFillPauseFill className="text-xl md:text-3xl" />
+          <IoPauseCircleOutline className="text-3xl md:text-4xl" />
         ) : (
-          <BsFillPlayFill className="text-xl md:text-3xl" />
+          <IoPlayCircleOutline className="text-3xl md:text-4xl" />
         )}
       </button>
       {forward && <button
@@ -94,10 +91,10 @@ const Controls : FC<AudioPlayerOptions> = ({repeat , forward}) => {
         onMouseUp={stopCounter}
         onMouseLeave={stopCounter}
       >
-        <BsFillFastForwardFill className="text-xl md:text-3xl" />
+        <BsFillFastForwardFill className="text-xl md:text-" />
       </button>}
       <button onClick={playNext}>
-        <BsSkipEndFill className="text-xl md:text-3xl" />
+        <BsSkipEndFill className="text-xl md:text-" />
       </button>
      {repeat &&  <button
         onClick={toggleRepeat}
@@ -106,9 +103,9 @@ const Controls : FC<AudioPlayerOptions> = ({repeat , forward}) => {
         } `}
       >
         {repeatState === "REPEATCURRENT" ? (
-          <BsRepeat1 className="text-xl md:text-3xl" />
+          <BsRepeat1 className="text-xl md:text-" />
         ) : (
-          <BsRepeat className="text-xl md:text-3xl" />
+          <BsRepeat className="text-xl md:text-" />
         )}
       </button>}
       <div className="bg-red-800 absolute top-0"></div>

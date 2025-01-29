@@ -10,3 +10,19 @@ export interface Track {
   thumbnail?: string;
 }
 
+export type ValidColor =
+  | `#${string}` // Hex colors (e.g., #ccc, #ffffff)
+  | `rgb(${number}, ${number}, ${number})` // RGB colors
+  | `rgba(${number}, ${number}, ${number}, ${number})` // RGBA colors
+  | "red"
+  | "blue"
+  | "green" // Named colors
+  | "transparent" // Special keyword
+  | "currentColor"; // CSS keyword
+
+export interface ThemeOptions {
+  primaryColor?: ValidColor;
+  secondaryColor?: ValidColor;
+  progressbarbgColor?: ValidColor;
+  progressbarDarkbgColor?: ValidColor;
+}

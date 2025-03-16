@@ -4,24 +4,28 @@ import { formatTime } from "../utils/utils";
 import styled from "styled-components";
 import { ThemeOptions } from "../types/types";
 
-
 const Progress = styled.input<{
-  $audioref: React.RefObject<HTMLAudioElement>;
+  $progress: number;
   $darkMode: boolean;
-  $theme:ThemeOptions
+  $theme: ThemeOptions;
+  $isLive: boolean;
 }>`
-  --background: ${(props) => (props.$theme?.progressbarbgColor ? props.$theme?.progressbarbgColor :"#dad9d9")};
-  --main:${(props) => (props.$theme?.primaryColor ? props.$theme?.primaryColor :"#6c6c6c")};
-  --secondary: ${(props) => (props.$theme?.secondaryColor ? props.$theme?.secondaryColor :"#2a2a2a")};
-  --darkbackground: ${(props) => (props.$theme?.progressbarDarkbgColor ? props.$theme?.progressbarDarkbgColor :"#2b2b2b")};
-  --bar-bg: ${props=>props.$darkMode ? 'var(--darkbackground)' : 'var(--background)'};
+  --background: ${(props) =>
+    props.$theme?.progressbarbgColor
+      ? props.$theme?.progressbarbgColor
+      : "#dad9d9"};
+  --main: ${(props) =>
+    props.$theme?.primaryColor ? props.$theme?.primaryColor : "#6c6c6c"};
+  --secondary: ${(props) =>
+    props.$theme?.secondaryColor ? props.$theme?.secondaryColor : "#2a2a2a"};
+  --darkbackground: ${(props) =>
+    props.$theme?.progressbarDarkbgColor
+      ? props.$theme?.progressbarDarkbgColor
+      : "#2b2b2b"};
+  --bar-bg: ${(props) =>
+    props.$darkMode ? "var(--darkbackground)" : "var(--background)"};
   --seek-before-width: ${(props) =>
-    props.$audioref.current
-      ? (props.$audioref.current?.currentTime /
-          props.$audioref.current?.duration) *
-          100 +
-        "%"
-      : 0};
+    props.$isLive ? "0%" : `${props.$progress}%`};
   --seek-before-color: var(--main);
 
   position: relative;
@@ -31,6 +35,8 @@ const Progress = styled.input<{
   margin: auto 0;
   width: 33.33%;
   outline: none;
+  opacity: ${(props) => (props.$isLive ? 0.5 : 1)};
+  cursor: ${(props) => (props.$isLive ? "not-allowed" : "pointer")};
 
   /* progress bar style for safari */
   &::-webkit-slider-runnable-track {
@@ -38,7 +44,7 @@ const Progress = styled.input<{
     height: 5px;
     margin: auto 0;
     width: 20%;
-    cursor: pointer;
+    cursor: ${(props) => (props.$isLive ? "not-allowed" : "pointer")};
     outline: none;
   }
 
@@ -64,7 +70,7 @@ const Progress = styled.input<{
     top: 0;
     left: 0;
     z-index: 2;
-    cursor: pointer;
+    cursor: ${(props) => (props.$isLive ? "not-allowed" : "pointer")};
   }
 
   &::-moz-range-progress {
@@ -82,14 +88,15 @@ const Progress = styled.input<{
     border-radius: 50%;
     background-color: var(--secondary);
     border: none;
-    cursor: pointer;
+    cursor: ${(props) => (props.$isLive ? "not-allowed" : "pointer")};
     position: relative;
     margin: -3px 0 0 0;
     z-index: 3;
+    display: ${(props) => (props.$isLive ? "none" : "block")};
   }
 
   &:active::-webkit-slider-thumb {
-    transform: scale(1.2);
+    transform: ${(props) => (props.$isLive ? "none" : "scale(1.2)")};
     background-color: var(--secondary);
   }
 
@@ -99,21 +106,22 @@ const Progress = styled.input<{
     border-radius: 50%;
     background-color: var(--main);
     border: transparent;
-    cursor: pointer;
+    cursor: ${(props) => (props.$isLive ? "not-allowed" : "pointer")};
     position: relative;
     z-index: 3;
+    display: ${(props) => (props.$isLive ? "none" : "block")};
   }
 
   &:active::-moz-range-thumb {
-    transform: scale(1.2);
+    transform: ${(props) => (props.$isLive ? "none" : "scale(1.2)")};
   }
 `;
 
-const ProgressBar: React.FC<{ darkMode: boolean , theme: ThemeOptions }> = ({
+const ProgressBar: React.FC<{ darkMode: boolean; theme: ThemeOptions }> = ({
   darkMode,
-  theme
+  theme,
 }) => {
-  const { audioRef } = useAudioPlayerContext();
+  const { audioRef, isLive } = useAudioPlayerContext();
   const [currentTime, setCurrentTime] = useState<string>("00:00");
   const [duration, setDuration] = useState<string>("00:00");
   const progressRef = useRef<HTMLInputElement | null>(null);
@@ -151,25 +159,32 @@ const ProgressBar: React.FC<{ darkMode: boolean , theme: ThemeOptions }> = ({
         (Number(progressRef.current?.value) / 100) * audioRef.current.duration;
     }
   };
+  let progress;
+  if (audioRef.current) {
+    progress =
+      audioRef.current.duration > 0
+        ? (audioRef.current.currentTime / audioRef.current.duration) * 100
+        : 0;
+  }
 
   return (
     <div className="flex items-center justify-center gap-5 w-full">
       <span>{currentTime ? currentTime : "00:00"}</span>
       <Progress
-      $theme={theme}
+        $progress={progress || 0}
+        $isLive={isLive}
+        $theme={theme}
         $darkMode={darkMode}
         $audioref={audioRef}
         ref={progressRef}
+        disabled={isLive}
         onChange={handleSetCurrentTime}
-        value={
-          audioRef.current
-            ? (audioRef.current?.currentTime / audioRef.current?.duration) * 100
-            : 0
-        }
+        value={progress ? progress : 0}
         className="md:max-w-[80%]"
         type="range"
       />
-      <span>{duration ? duration : "00:00"}</span>
+       <span className="hidden md:block">{isLive ? "--:--" : duration}</span>
+       <span className="block md:hidden">{isLive ? <span className="text-red-500">LIVE</span> : duration}</span>
     </div>
   );
 };

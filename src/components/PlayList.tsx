@@ -1,4 +1,3 @@
-import React from "react";
 import { useAudioPlayerContext } from "../context/audio-player-context";
 
 function PlayList() {
@@ -6,7 +5,7 @@ function PlayList() {
   return <>
   
   {tracksQueue?.length > 0 ? tracksQueue?.map((track , idx) => (
-    <div key={idx} onClick={RemoveFromQueue.bind(this,idx)}>{track.title}</div>
+    <div key={idx} onClick={()=>RemoveFromQueue(idx)}>{track.title}</div>
   )) : ''}</>;
 }
 

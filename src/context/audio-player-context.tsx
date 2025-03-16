@@ -29,7 +29,7 @@ interface AudioPlayerContextType {
   repeatState: RepeatToggleStates;
   toggleRepeat: () => void;
   isLive: boolean;
-  volume : number;
+  volume : number
   setVolume: (volume: number) => void
 }
 

@@ -7,9 +7,9 @@ import {
   SetStateAction,
   useRef,
   useEffect,
+  useCallback,
 } from "react";
 import { RepeatToggleStates, Track } from "../types/types";
-import { tracks } from "../data";
 
 interface AudioPlayerContextType {
   currentTrack: Track | null;
@@ -28,6 +28,9 @@ interface AudioPlayerContextType {
   tracksQueue: Track[] | null;
   repeatState: RepeatToggleStates;
   toggleRepeat: () => void;
+  isLive: boolean;
+  volume : number;
+  setVolume: (volume: number) => void
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
@@ -41,6 +44,8 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const [tracksQueue, setTracksQueue] = useState<Track[] | []>([]);
   const [isEnded, setIsEnded] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isLive, setIsLive] = useState<boolean>(false);
+  const [volume, setVolumeState] = useState<number>(1)
   const [repeatState, setRePeatState] =
     useState<RepeatToggleStates>("NOREPEAT");
 
@@ -87,13 +92,19 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (currentTrack && audioRef.current) {
       audioRef.current.src = currentTrack.src;
+      setIsLive(false);
       setIsPlaying(true);
       const playAudio = () => {
         audioRef.current?.play().catch((err) => {
           console.error("Error playing audio:", err);
         });
       };
-      audioRef.current.addEventListener("loadedmetadata", playAudio);
+      audioRef.current.addEventListener("loadedmetadata", () => {
+        playAudio()
+        if (audioRef.current) {
+          setIsLive(!isFinite(audioRef.current.duration));
+        }
+      });
       return () => {
         audioRef.current?.removeEventListener("loadedmetadata", playAudio);
       };
@@ -172,6 +183,14 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const setVolume = useCallback((newVolume: number) => {
+    const clampedVolume = Math.max(0, Math.min(1, newVolume))
+    setVolumeState(clampedVolume)
+
+    if (audioRef.current) {
+      audioRef.current.volume = clampedVolume
+    }
+  }, [])
   const playPrev = () => {
     if (tracksQueue[currentTrackIdx - 1]) {
       setCurrentTrack(tracksQueue[currentTrackIdx - 1]);
@@ -230,6 +249,9 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     togglePlayButton,
     playTrack,
     isPlaying,
+    isLive,
+    volume, 
+    setVolume
   };
   return (
     <AudioPlayerContext.Provider value={contextValue}>

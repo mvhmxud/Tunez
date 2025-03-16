@@ -1,6 +1,8 @@
 import { AudioPlayer } from "./components/AudioPLayer";
 import { AudioPlayerProvider } from "./context/audio-player-context";
 
+
+
 function App() {
   return (
     <AudioPlayerProvider>
@@ -9,7 +11,7 @@ function App() {
           showAuthor
           showThumbnail
           repeat
-          // darkMode
+          darkMode
           volume
         />
     </AudioPlayerProvider>

@@ -13,8 +13,8 @@ import { RepeatToggleStates, Track } from "../types/types";
 
 interface AudioPlayerContextType {
   currentTrack: Track | null;
-  currentTrackIdx: number | null;
-  setCurrentTrack: Dispatch<SetStateAction<Track>>;
+  currentTrackIdx: number;
+  setCurrentTrack: Dispatch<SetStateAction<Track | null>>;
   isPlaying: boolean;
   audioRef: React.RefObject<HTMLAudioElement>;
   playTrack: (track: Track) => void;
@@ -25,12 +25,12 @@ interface AudioPlayerContextType {
   FastForward: () => void;
   Rewind: () => void;
   togglePlayButton: () => void;
-  tracksQueue: Track[] | null;
+  tracksQueue: Track[];
   repeatState: RepeatToggleStates;
   toggleRepeat: () => void;
   isLive: boolean;
-  volume : number
-  setVolume: (volume: number) => void
+  volume: number;
+  setVolume: (volume: number) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
@@ -39,13 +39,13 @@ const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
 
 export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [currentTrack, setCurrentTrack] = useState<Track | null>();
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [currentTrackIdx, setCurrentTrackIdx] = useState<number>(0);
-  const [tracksQueue, setTracksQueue] = useState<Track[] | []>([]);
+  const [tracksQueue, setTracksQueue] = useState<Track[]>([]);
   const [isEnded, setIsEnded] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isLive, setIsLive] = useState<boolean>(false);
-  const [volume, setVolumeState] = useState<number>(1)
+  const [volume, setVolumeState] = useState<number>(1);
   const [repeatState, setRePeatState] =
     useState<RepeatToggleStates>("NOREPEAT");
 
@@ -66,7 +66,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isEnded) {
-      const isLastTrack = currentTrackIdx == tracksQueue.length - 1;
+      const isLastTrack = currentTrackIdx === tracksQueue.length - 1;
       switch (repeatState) {
         case "NOREPEAT":
           if (!isLastTrack) {
@@ -100,7 +100,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         });
       };
       audioRef.current.addEventListener("loadedmetadata", () => {
-        playAudio()
+        playAudio();
         if (audioRef.current) {
           setIsLive(!isFinite(audioRef.current.duration));
         }
@@ -153,20 +153,21 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const playTrack = (track: Track) => {
-    if (currentTrack?.title != track.title) {
+    if (currentTrack?.title !== track.title) {
       emptyTracksQueue();
       AddToQueue(track);
       setCurrentTrack(track);
       setCurrentTrackIdx(0);
     }
   };
+
   const RemoveFromQueue = (idx: number) => {
     setTracksQueue((prev) => {
       const newQueue = [...prev];
       newQueue.splice(idx, 1);
 
       if (idx === currentTrackIdx) {
-        if (tracksQueue.length == 1) {
+        if (tracksQueue.length === 1) {
           emptyTracksQueue();
         }
         playNext();
@@ -179,18 +180,19 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
   const playNext = () => {
     if (tracksQueue[currentTrackIdx + 1]) {
       setCurrentTrack(tracksQueue[currentTrackIdx + 1]);
-      return setCurrentTrackIdx((prev) => prev + 1);
+      setCurrentTrackIdx((prev) => prev + 1);
     }
   };
 
   const setVolume = useCallback((newVolume: number) => {
-    const clampedVolume = Math.max(0, Math.min(1, newVolume))
-    setVolumeState(clampedVolume)
+    const clampedVolume = Math.max(0, Math.min(1, newVolume));
+    setVolumeState(clampedVolume);
 
     if (audioRef.current) {
-      audioRef.current.volume = clampedVolume
+      audioRef.current.volume = clampedVolume;
     }
-  }, [])
+  }, []);
+
   const playPrev = () => {
     if (tracksQueue[currentTrackIdx - 1]) {
       setCurrentTrack(tracksQueue[currentTrackIdx - 1]);
@@ -203,7 +205,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
       const currTime = audioRef.current.currentTime;
       const duration = audioRef.current.duration;
       if (currTime + 1 < duration) {
-        audioRef.current.currentTime = audioRef.current?.currentTime + 1;
+        audioRef.current.currentTime = audioRef.current.currentTime + 1;
       }
     }
   };
@@ -224,15 +226,15 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     if (currentTrack) {
       setIsPlaying((prev) => !prev);
     }
-    return;
   };
+
   const Rewind = () => {
     if (audioRef.current?.src) {
       audioRef.current.currentTime = audioRef.current.currentTime - 1;
     }
   };
 
-  const contextValue = {
+  const contextValue: AudioPlayerContextType = {
     currentTrack,
     currentTrackIdx,
     setCurrentTrack,
@@ -250,9 +252,10 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     playTrack,
     isPlaying,
     isLive,
-    volume, 
-    setVolume
+    volume,
+    setVolume,
   };
+
   return (
     <AudioPlayerContext.Provider value={contextValue}>
       {children}

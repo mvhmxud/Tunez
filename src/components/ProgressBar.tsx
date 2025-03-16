@@ -7,7 +7,7 @@ import { ThemeOptions } from "../types/types";
 const Progress = styled.input<{
   $progress: number;
   $darkMode: boolean;
-  $theme: ThemeOptions;
+  $theme?: ThemeOptions;
   $isLive: boolean;
 }>`
   --background: ${(props) =>
@@ -117,7 +117,7 @@ const Progress = styled.input<{
   }
 `;
 
-const ProgressBar: React.FC<{ darkMode: boolean; theme: ThemeOptions }> = ({
+const ProgressBar: React.FC<{ darkMode: boolean; theme?: ThemeOptions  }> = ({
   darkMode,
   theme,
 }) => {
@@ -175,7 +175,6 @@ const ProgressBar: React.FC<{ darkMode: boolean; theme: ThemeOptions }> = ({
         $isLive={isLive}
         $theme={theme}
         $darkMode={darkMode}
-        $audioref={audioRef}
         ref={progressRef}
         disabled={isLive}
         onChange={handleSetCurrentTime}

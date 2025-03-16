@@ -11,7 +11,6 @@ function App() {
           repeat
           // darkMode
           volume
-         
         />
     </AudioPlayerProvider>
   );

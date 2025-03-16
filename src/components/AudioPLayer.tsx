@@ -26,7 +26,7 @@ export const AudioPlayer: React.FC<AudioPlayerOptions> = ({
   return (
     <section className={darkMode ? "dark" : ""}>
       <div
-        className="min-h-20 dark:bg-zinc-950 drop-shadow-sm text-zinc-500 dark:text-slate-50 rounded-t-md absolute bottom-0 w-[100vw] flex gap-3 md:gap-9 lg:flex-row justify-between items-center px-4 py-2"
+        className="min-h-20 dark:bg-zinc-950 drop-shadow-sm text-zinc-500 dark:text-slate-50 rounded-t-md fixed bottom-0 w-[100vw] flex gap-3 md:gap-9 lg:flex-row justify-between items-center px-4 py-2"
         style={{ backgroundColor: darkMode ? theme?.darkContainerBg :  theme?.containerBg  }}
       >
         <TrackInfo showThumbnail={showThumbnail} showAuthor={showAuthor} />

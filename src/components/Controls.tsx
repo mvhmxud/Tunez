@@ -8,18 +8,65 @@ import {
   BsRepeat,
   BsRepeat1,
 } from "react-icons/bs";
-import { tracks } from "../data";
-import { AudioPlayerOptions } from "./AudioPLayer";
 import { IoPauseCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
+import styled from "styled-components";
+import { AudioPlayerOptions } from "./AudioPLayer";
+import { ValidColor } from "../types/types";
+
+const ControlsContainer = styled.div<{ $primaryColor?: string }>`
+  display: flex;
+  align-items: center;
+  color: ${({ $primaryColor }) => $primaryColor || "inherit"};
+  @media (min-width: 1000px) {
+    gap: 1rem;
+  }
+`;
+
+const Button = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: inherit; /* Inherit text color */
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  @media (min-width: 1000px) {
+    font-size: 1.5rem; /* Tailwind md:text-2xl */
+  }
+`;
+
+const PlayPauseButton = styled(Button)`
+  font-size: 1.875rem; /* Tailwind text-3xl */
+  @media (min-width: 1000px) {
+    font-size: 2.25rem; /* Tailwind md:text-4xl */
+  }
+`;
+
+const RepeatButton = styled(Button)<{
+  $active: boolean;
+  $primaryColor: ValidColor;
+}>`
+  color: ${({ $active, $primaryColor }) =>
+    $active ? $primaryColor : "inherit"};
+`;
+const ForwardRewindWrapper = styled.div`
+  display: none; /* Hide by default */
+
+  @media (min-width: 1000px) {
+    display: flex; /* Show on larger screens */
+  }
+`;
 
 const Controls: FC<AudioPlayerOptions> = ({ repeat, forward, theme }) => {
   const {
     audioRef,
     currentTrack,
-    AddToQueue,
-    playTrack,
-    playNext,
     playPrev,
+    playNext,
     FastForward,
     Rewind,
     repeatState,
@@ -33,17 +80,13 @@ const Controls: FC<AudioPlayerOptions> = ({ repeat, forward, theme }) => {
   const handleFastForward = () => {
     if (!audioRef.current?.src) return;
     if (intervalRef.current) return;
-    intervalRef.current = setInterval(() => {
-      FastForward();
-    }, 100);
+    intervalRef.current = setInterval(FastForward, 100);
   };
 
   const handleRewind = () => {
     if (!audioRef.current?.src) return;
     if (intervalRef.current) return;
-    intervalRef.current = setInterval(() => {
-      Rewind();
-    }, 100);
+    intervalRef.current = setInterval(Rewind, 100);
   };
 
   const stopCounter = () => {
@@ -54,65 +97,47 @@ const Controls: FC<AudioPlayerOptions> = ({ repeat, forward, theme }) => {
   };
 
   return (
-    <div
-      className="flex gap-4 items-center"
-      style={{ color: theme?.primaryColor }}
-    >
-      <div
-        className="flex gap-4 items-center"
-        style={{ color: theme?.primaryColor }}
-      >
-        <audio ref={audioRef} src={currentTrack?.src} />
-        <button onClick={playPrev}>
-          <BsSkipStartFill className="text-xl md:text-2xl " />
-        </button>
-        {forward && (
-          <button
+    <ControlsContainer $primaryColor={theme?.primaryColor}>
+      <audio ref={audioRef} src={currentTrack?.src} />
+      <Button onClick={playPrev}>
+        <BsSkipStartFill />
+      </Button>
+      {forward && (
+        <ForwardRewindWrapper>
+          <Button
             onMouseDown={handleRewind}
             onMouseUp={stopCounter}
             onMouseLeave={stopCounter}
           >
-            <BsFillRewindFill className="text-xl md:text-2xl" />
-          </button>
-        )}
-        <button onClick={togglePlayButton}>
-          {isPlaying ? (
-            <IoPauseCircleOutline className="text-3xl md:text-4xl" />
-          ) : (
-            <IoPlayCircleOutline className="text-3xl md:text-4xl" />
-          )}
-        </button>
-        {forward && (
-          <button
-            onMouseDown={handleFastForward}
-            onMouseUp={stopCounter}
-            onMouseLeave={stopCounter}
-          >
-            <BsFillFastForwardFill className="text-xl md:text-2xl" />
-          </button>
-        )}
-        <button onClick={playNext}>
-          <BsSkipEndFill className="text-xl md:text-2xl" />
-        </button>
-        {repeat && (
-          <button
-            onClick={toggleRepeat}
-            className={`${
-              repeatState === "REPEAT" || repeatState === "REPEATCURRENT"
-                ? "text-[#f50]"
-                : ""
-            }`}
-          >
-            {repeatState === "REPEATCURRENT" ? (
-              <BsRepeat1 className="text-xl md:text-2xl" />
-            ) : (
-              <BsRepeat className="text-xl md:text-2xl" />
-            )}
-          </button>
-        )}
-        <div className="bg-red-800 absolute top-0"></div>
-      </div>
-    </div>
+            <BsFillRewindFill />
+          </Button>
+        </ForwardRewindWrapper>
+      )}
+      <PlayPauseButton onClick={togglePlayButton}>
+        {isPlaying ? <IoPauseCircleOutline /> : <IoPlayCircleOutline />}
+      </PlayPauseButton>
+      {forward && (
+        <Button
+          onMouseDown={handleFastForward}
+          onMouseUp={stopCounter}
+          onMouseLeave={stopCounter}
+        >
+          <BsFillFastForwardFill />
+        </Button>
+      )}
+      <Button onClick={playNext}>
+        <BsSkipEndFill />
+      </Button>
+      {repeat && (
+        <RepeatButton
+          $primaryColor={theme?.primaryColor || "black"}
+          onClick={toggleRepeat}
+          $active={repeatState === "REPEAT" || repeatState === "REPEATCURRENT"}
+        >
+          {repeatState === "REPEATCURRENT" ? <BsRepeat1 /> : <BsRepeat />}
+        </RepeatButton>
+      )}
+    </ControlsContainer>
   );
 };
 

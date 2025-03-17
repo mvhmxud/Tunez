@@ -1,21 +1,26 @@
-import type React from "react"
-
-import { useRef } from "react"
-import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMuteOutline } from "react-icons/io5"
-import { useAudioPlayerContext } from "../context/audio-player-context"
-import type { ThemeOptions } from "../types/types"
-import styled from "styled-components"
+import type React from "react";
+import { useRef } from "react";
+import {
+  IoVolumeHighOutline,
+  IoVolumeLowOutline,
+  IoVolumeMuteOutline,
+} from "react-icons/io5";
+import { useAudioPlayerContext } from "../context/audio-player-context";
+import type { ThemeOptions } from "../types/types";
+import styled from "styled-components";
 
 const VolumeSlider = styled.input<{
-  $volume: number
-  $darkMode: boolean
-  $theme: ThemeOptions
+  $volume: number;
+  $darkMode: boolean;
+  $theme: ThemeOptions;
 }>`
   --background: ${(props) => props.$theme?.progressbarbgColor || "#dad9d9"};
   --main: ${(props) => props.$theme?.primaryColor || "#6c6c6c"};
   --secondary: ${(props) => props.$theme?.secondaryColor || "#2a2a2a"};
-  --darkbackground: ${(props) => props.$theme?.progressbarDarkbgColor || "#2b2b2b"};
-  --bar-bg: ${(props) => (props.$darkMode ? "var(--darkbackground)" : "var(--background)")};
+  --darkbackground: ${(props) =>
+    props.$theme?.progressbarDarkbgColor || "#2b2b2b"};
+  --bar-bg: ${(props) =>
+    props.$darkMode ? "var(--darkbackground)" : "var(--background)"};
   --seek-before-width: ${(props) => `${props.$volume * 100}%`};
   --seek-before-color: var(--main);
 
@@ -105,46 +110,76 @@ const VolumeSlider = styled.input<{
   &:active::-moz-range-thumb {
     transform: scale(1.2);
   }
-`
+`;
 
+const Container = styled.div`
+  display: flex;
+  gap: 12px;
+  min-width: 8rem;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  display: none;
+  @media (min-width: 768px) {
+    display: flex;
+  }
+`;
+
+const VolumeButton = styled.button<{
+  $theme: ThemeOptions;
+}>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: ${(props) => props.$theme?.primaryColor || "inherit"};
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  @media (min-width: 768px) {
+    font-size: 1.5rem; /* Tailwind md:text-2xl */
+  }
+`;
 
 interface VolumeControlProps {
-  darkMode?: boolean
-  theme?: ThemeOptions
+  darkMode?: boolean;
+  theme?: ThemeOptions;
 }
 
-const VolumeControl: React.FC<VolumeControlProps> = ({ darkMode = false, theme = {} }) => {
-  const { volume, setVolume } = useAudioPlayerContext()
-  const rangeRef = useRef<HTMLInputElement>(null)
+const VolumeControl: React.FC<VolumeControlProps> = ({
+  darkMode = false,
+  theme = {},
+}) => {
+  const { volume, setVolume } = useAudioPlayerContext();
+  const rangeRef = useRef<HTMLInputElement>(null);
 
   const onChangeHandler = () => {
     if (rangeRef.current) {
-      const newVolume = Number(rangeRef.current.value) / 100
-      setVolume(newVolume)
+      const newVolume = Number(rangeRef.current.value) / 100;
+      setVolume(newVolume);
     }
-  }
+  };
 
   const VolumeIcon = () => {
-    if (volume === 0) return <IoVolumeMuteOutline />
-    if (volume < 0.5) return <IoVolumeLowOutline />
-    return <IoVolumeHighOutline />
-  }
+    if (volume === 0) return <IoVolumeMuteOutline />;
+    if (volume < 0.5) return <IoVolumeLowOutline />;
+    return <IoVolumeHighOutline />;
+  };
 
   const toggleMute = () => {
-    if (volume > 0) {
-      setVolume(0)
-    } else {
-      setVolume(1)
-    }
-  }
+    setVolume(volume > 0 ? 0 : 1);
+  };
 
   return (
-    <div
-      className={`gap-3 min-w-32 text-2xl mx-auto hidden md:flex justify-center items-center `}
-    >
-      <button onClick={toggleMute} className="hover:text-primary transition-colors">
+    <Container>
+      <VolumeButton 
+        $theme={theme}
+      onClick={toggleMute}>
         <VolumeIcon />
-      </button>
+      </VolumeButton>
       <VolumeSlider
         $volume={volume}
         $darkMode={darkMode}
@@ -155,11 +190,9 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ darkMode = false, theme =
         max="100"
         value={volume * 100}
         onChange={onChangeHandler}
-        className="w-24"
       />
-    </div>
-  )
-}
+    </Container>
+  );
+};
 
-export default VolumeControl
-
+export default VolumeControl;

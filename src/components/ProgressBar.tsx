@@ -33,7 +33,7 @@ const Progress = styled.input<{
   background: var(--bar-bg);
   height: 5px;
   margin: auto 0;
-  width: 33.33%;
+  width: 100%;
   outline: none;
   opacity: ${(props) => (props.$isLive ? 0.5 : 1)};
   cursor: ${(props) => (props.$isLive ? "not-allowed" : "pointer")};
@@ -117,7 +117,37 @@ const Progress = styled.input<{
   }
 `;
 
-const ProgressBar: React.FC<{ darkMode: boolean; theme?: ThemeOptions  }> = ({
+const Container = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-around; /* Even spacing between elements */
+  gap: 20px;
+  width: 100%;
+  flex-grow: 1;
+`;
+
+const TimeTextDesktop = styled.span`
+  display: none;
+  white-space: no-wrap;
+  @media (min-width: 1000px) {
+    display: inline;
+  }
+`;
+
+const TimeTextMobile = styled.span`
+  display: inline;
+
+  @media (min-width: 1000px) {
+    display: none;
+  }
+`;
+
+const LiveIndicator = styled.span`
+  color: red;
+  font-weight: bold;
+`;
+
+const ProgressBar: React.FC<{ darkMode: boolean; theme?: ThemeOptions }> = ({
   darkMode,
   theme,
 }) => {
@@ -168,7 +198,7 @@ const ProgressBar: React.FC<{ darkMode: boolean; theme?: ThemeOptions  }> = ({
   }
 
   return (
-    <div className="flex items-center justify-center gap-5 w-full">
+    <Container>
       <span>{currentTime ? currentTime : "00:00"}</span>
       <Progress
         $progress={progress || 0}
@@ -179,12 +209,15 @@ const ProgressBar: React.FC<{ darkMode: boolean; theme?: ThemeOptions  }> = ({
         disabled={isLive}
         onChange={handleSetCurrentTime}
         value={progress ? progress : 0}
-        className="md:max-w-[80%]"
         type="range"
       />
-       <span className="hidden md:block">{isLive ? "--:--" : duration}</span>
-       <span className="block md:hidden">{isLive ? <span className="text-red-500">LIVE</span> : duration}</span>
-    </div>
+      <TimeTextDesktop style={{ whiteSpace: "nowrap" }}>
+        {isLive ? "--:--" : duration}
+      </TimeTextDesktop>
+      <TimeTextMobile>
+        {isLive ? <LiveIndicator>LIVE</LiveIndicator> : duration}
+      </TimeTextMobile>
+    </Container>
   );
 };
 

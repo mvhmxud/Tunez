@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import TrackInfo from "./TrackInfo";
 import Controls from "./Controls";
 import ProgressBar from "./ProgressBar";
@@ -14,6 +15,34 @@ export interface AudioPlayerOptions {
   theme?: ThemeOptions;
 }
 
+const PlayerContainer = styled.div<{
+  $darkMode: boolean;
+  theme?: ThemeOptions;
+}>`
+  min-height: 5rem;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  color: ${({ $darkMode }) => ($darkMode ? "#f8fafc" : "#71717a")};
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  z-index: 10;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: ${({ $darkMode, theme }) =>
+    $darkMode
+      ? theme?.darkContainerBg || "#0f0f0f"
+      : theme?.containerBg || "#f9f9f9"};
+
+  @media (min-width: 768px) {
+    gap: 2.25rem;
+  }
+`;
+
 export const AudioPlayer: React.FC<AudioPlayerOptions> = ({
   theme,
   forward = false,
@@ -24,16 +53,11 @@ export const AudioPlayer: React.FC<AudioPlayerOptions> = ({
   darkMode = false,
 }) => {
   return (
-    <section className={darkMode ? "dark" : ""}>
-      <div
-        className="min-h-20 dark:bg-zinc-950 drop-shadow-sm text-zinc-500 dark:text-slate-50 rounded-t-md fixed bottom-0 w-[100vw] flex gap-3 md:gap-9 lg:flex-row justify-between items-center px-4 py-2"
-        style={{ backgroundColor: darkMode ? theme?.darkContainerBg :  theme?.containerBg  }}
-      >
-        <TrackInfo showThumbnail={showThumbnail} showAuthor={showAuthor} />
-        <Controls theme={theme} forward={forward} repeat={repeat} />
-        <ProgressBar theme={theme} darkMode={darkMode} />
-        {volume ? <VolumeControl darkMode={darkMode} theme={theme} /> : ""}
-      </div>
-    </section>
+    <PlayerContainer $darkMode={darkMode} theme={theme}>
+      <TrackInfo showThumbnail={showThumbnail} showAuthor={showAuthor} />
+      <Controls theme={theme} forward={forward} repeat={repeat} />
+      <ProgressBar theme={theme} darkMode={darkMode} />
+      {volume && <VolumeControl darkMode={darkMode} theme={theme} />}
+    </PlayerContainer>
   );
 };
